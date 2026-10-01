@@ -39,7 +39,8 @@ class IntStack {
         }
 
         const IntStack& operator= (const IntStack& stack){
-            IntStack tmp(stack); clear();
+            IntStack tmp(stack); 
+            clear();
             top = tmp.top;
             tmp.top=nullptr;
 
