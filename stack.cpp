@@ -178,9 +178,7 @@ void tests(IntStack &st){
     cout << "fine\n";
 
     cout << "3rd test - ";
-    IntStack st2;
     st.push(2); st.push(6); st.push(7);
-    st2.push(2); st2.push(6); st2.push(7);
     try{st=st;}
     catch(stackerror& e){
         message = e.msg();
