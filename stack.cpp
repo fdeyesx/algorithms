@@ -1,5 +1,29 @@
 #include <iostream>
+#include <cassert>
 using namespace std;
+
+class stackerror{
+    protected: string message; 
+    public:
+        stackerror(const string& text) {message = text;}
+        ~stackerror() {}
+        string msg(){return message;}
+};
+
+class EmptyStackException : public stackerror{
+    public:
+        EmptyStackException(): stackerror("Stack is empty."){}
+};
+
+class WrongTypeException : public stackerror{
+    public:
+        WrongTypeException(): stackerror("Wrong type's been entered."){}
+};
+
+class SameDataException : public stackerror{
+    public:
+        SameDataException(): stackerror("Assignment same stack."){}
+};
 
 class IntStack {
     private:
@@ -20,7 +44,7 @@ class IntStack {
         }
 
         IntStack(const IntStack& stack){
-            if (stack.top == nullptr) return;
+            if (stack.top == nullptr) throw EmptyStackException();
 
             top = new Node;
             top->value=stack.top->value;
@@ -39,8 +63,9 @@ class IntStack {
         }
 
         const IntStack& operator= (const IntStack& stack){
-            IntStack tmp(stack); 
-            clear();
+            if(this == &stack) throw SameDataException();
+
+            IntStack tmp(stack); clear();
             top = tmp.top;
             tmp.top=nullptr;
 
@@ -75,7 +100,7 @@ class IntStack {
         }
 
         int pop() {
-            if (top == nullptr) return -1;
+            if (top == nullptr) throw EmptyStackException();
             int value = top->value;
             Node* tmp = top;
             top = top->next;
@@ -84,7 +109,7 @@ class IntStack {
         }
 
         int peek() {
-            return top == nullptr ? -1 : top->value;
+            return top == nullptr ? throw EmptyStackException() : top->value;
         }
 
         bool isEmpty() {
@@ -100,21 +125,89 @@ class IntStack {
         }
 };
 
-int main() {
-    IntStack st;
+void cycle(IntStack &st){
     int command;
     cin >> command;
     while (command) {
         switch (command) {
-            case 1: {int value; cin >> value; st.push(value); break;}
-            case 2: cout << st.pop() << "\n"; break;
+            case 1: {
+                int value; cin >> value; 
+                st.push(value); 
+                break;
+            }
+            case 2: {
+                try{st.pop();}
+                catch(stackerror& e){
+                    cout << e.msg() << '\n';
+                }
+                break;
+            }
             case 3: cout << st; break;
-            case 4: cout << st.peek() << "\n"; break;
+            case 4: {
+                try{st.peek();}
+                catch(stackerror& e){
+                    cout << e.msg() << '\n';
+                }
+                break;
+            }
             case 5: cout << st.isEmpty() << "\n"; break;
             case 6: st.clear(); break;
             case 7: cin >> st; break;
         }
         cin >> command;
+    }
+}
+
+void tests(IntStack &st){
+    string message = " ";
+
+    cout << "1st test - ";
+    try{st.pop();}
+    catch(stackerror& e){
+        message = e.msg();
+    }
+    assert(message != " "); message = " ";
+    cout << "fine\n";
+
+    cout << "2nd test - ";
+    try{st.peek();}
+    catch(stackerror& e){
+        message = e.msg();
+    }
+    assert(message != " "); message = " ";
+    cout << "fine\n";
+
+    cout << "3rd test - ";
+    IntStack st2;
+    st.push(2); st.push(6); st.push(7);
+    st2.push(2); st2.push(6); st2.push(7);
+    try{st=st;}
+    catch(stackerror& e){
+        message = e.msg();
+    }
+    assert(message != " "); message = " ";
+    st.clear();
+    cout << "fine\n";
+
+    cout << "4th test - ";
+    st.push(10); st.push(20); st.push(7); 
+    assert(st.peek() == 7);
+    assert(st.pop() == 7);
+    assert(st.peek() == 20);
+    assert(st.isEmpty() == 0);
+    cout << "fine\n";
+}
+
+int main() {
+    IntStack st;
+    int mode; cout << "Enter <1> for regular use, <2> for tests.\n"; cin >> mode;
+    switch (mode){
+    case 1:
+        cycle(st);
+        break;
+    case 2:
+        tests(st);
+        break;
     }
     return 0;
 }
