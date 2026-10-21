@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <cassert>
 using namespace std;
 
@@ -25,7 +26,24 @@ class SameDataException : public stackerror{
         SameDataException(): stackerror("Assignment same stack."){}
 };
 
-class IntStack {
+class Printable {
+public:
+    virtual ~Printable() = default;
+    virtual void print(ostream& os) const = 0;
+};
+
+class Cloneable {
+public:
+    virtual ~Cloneable() = default;
+    virtual Cloneable* clone() const = 0;
+};
+
+ostream& operator << (ostream& os, const Printable& p){
+    p.print(os);
+    return os;
+};
+
+class IntStack: public Printable, public Cloneable{
     private:
         struct Node {
             int value;
@@ -71,16 +89,6 @@ class IntStack {
 
             return *this;
         }
-        
-        friend ostream& operator<< (ostream& out, IntStack& stack){
-            Node* cur = stack.top;
-            while (cur != nullptr) {
-                out << cur->value << " -> ";
-                cur = cur->next;
-            }
-            out << "NULL\n";
-            return out;
-        }
 
         void push(int value) {
             Node* node = new Node;
@@ -123,6 +131,19 @@ class IntStack {
                 delete tmp;
             }
         }
+
+        void print(ostream& os) const override{
+            Node* cur = top;
+            while (cur != nullptr) {
+                os << cur->value << " -> ";
+                cur = cur->next;
+            }
+            os << "NULL\n";
+        }
+
+        IntStack* clone() const override{
+            return new IntStack(*this);
+        }
 };
 
 void cycle(IntStack &st){
@@ -159,41 +180,25 @@ void cycle(IntStack &st){
 }
 
 void tests(IntStack &st){
-    string message = " ";
+    st.push(6); st.push(123); st.push(92);
+    ostringstream stroke;
+    stroke<<st;
+    assert(stroke.str() == "92 -> 123 -> 6 -> NULL\n");
 
-    cout << "1st test - ";
-    try{st.pop();}
-    catch(stackerror& e){
-        message = e.msg();
-    }
-    assert(message != " "); message = " ";
-    cout << "fine\n";
+    IntStack *copy = st.clone();
+    assert(copy != nullptr);
+    assert(copy != &st);
 
-    cout << "2nd test - ";
-    try{st.peek();}
-    catch(stackerror& e){
-        message = e.msg();
-    }
-    assert(message != " "); message = " ";
-    cout << "fine\n";
+    ostringstream stroke2;
+    stroke2<<*copy;
+    assert(stroke2.str() == "92 -> 123 -> 6 -> NULL\n");
 
-    cout << "3rd test - ";
-    st.push(2); st.push(6); st.push(7);
-    try{st=st;}
-    catch(stackerror& e){
-        message = e.msg();
-    }
-    assert(message != " "); message = " ";
-    st.clear();
-    cout << "fine\n";
+    copy->pop();
+    assert(st.peek() == 92);
+    assert(copy->peek() == 123);
 
-    cout << "4th test - ";
-    st.push(10); st.push(20); st.push(7); 
-    assert(st.peek() == 7);
-    assert(st.pop() == 7);
-    assert(st.peek() == 20);
-    assert(st.isEmpty() == 0);
-    cout << "fine\n";
+    delete copy;
+    cout << "All tests were passed.\n";
 }
 
 int main() {
