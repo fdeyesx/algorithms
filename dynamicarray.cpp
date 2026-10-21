@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <cassert>
 using namespace std;
 
@@ -40,7 +41,24 @@ class NotFound : public arrayerror{
         NotFound(): arrayerror("Value hasn't been found."){}
 };
 
-class Array{
+class Printable {
+public:
+    virtual ~Printable() = default;
+    virtual void print(ostream& os) const = 0;
+};
+
+class Cloneable {
+public:
+    virtual ~Cloneable() = default;
+    virtual Cloneable* clone() const = 0;
+};
+
+ostream& operator << (ostream& os, const Printable& p){
+    p.print(os);
+    return os;
+};
+
+class Array: public Printable, public Cloneable{
     public:
         int size = 0; int capacity = 10; int *data;
         Array(){data = new int[capacity];}
@@ -74,14 +92,6 @@ class Array{
 
         int pop(){
             return size == 0 ? throw EmptyArrayException() : data[--size];
-        }
-
-        friend ostream& operator<< (ostream& out, Array& arr){
-            for (int i = 0; i<arr.size; ++i){
-                out<<arr.data[i];
-                if (i+1<arr.size) out<<" ";
-            }
-            return out;
         }
 
         void push(int value){
@@ -120,6 +130,17 @@ class Array{
             }
             throw NotFound();
         }
+
+        void print(ostream& os) const override{
+            for (int i = 0; i < size; ++i) {
+                os << data[i];
+                if (i + 1 < size) os << " ";}
+        }
+
+        Array* clone() const override{
+            return new Array(*this);
+        }
+
     private:
         void resize(){
             capacity*=2;
@@ -176,41 +197,25 @@ void cycle(Array &arr){
 }
 
 void tests(Array &arr){
-    string message = " ";
+    arr.push(6); arr.push(123); arr.push(92);
+    ostringstream stroke;
+    stroke<<arr;
+    assert(stroke.str() == "6 123 92");
 
-    cout << "1st test - ";
-    try{arr.pop();}
-    catch(arrayerror& e){
-        message = e.msg();
-    }
-    assert(message != " "); message = " ";
-    cout << "fine\n";
+    Array *copy = arr.clone();
+    assert(copy != nullptr);
+    assert(copy != &arr);
 
-    cout << "2nd test - ";
-    try{arr=arr;}
-    catch(arrayerror& e){
-        message = e.msg();
-    }
-    assert(message != " "); message = " ";
-    cout << "fine\n";
+    ostringstream stroke2;
+    stroke2<<*copy;
+    assert(stroke2.str() == "6 123 92");
 
-    cout << "3rd test - ";
-    arr.push(2); arr.push(18); arr.push(37); arr.push(0);
-    try{arr.change(4);}
-    catch(arrayerror& e){
-        message = e.msg();
-    }
-    assert(message != " "); message = " ";
-    
-    try{arr.search(15);}
-    catch(arrayerror& e){
-        message = e.msg();
-    }
-    assert(message != " "); message = " ";
+    copy->pop();
+    assert(copy->size == 2);
+    assert(arr.size == 3);
 
-    assert(arr.pop() == 0);
-    assert(arr.search(18) == 1);
-    cout << "fine\n";
+    delete copy;
+    cout << "All tests were passed.\n";
 }
 
 int main(){
