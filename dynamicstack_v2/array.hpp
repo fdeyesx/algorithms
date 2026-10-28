@@ -3,17 +3,18 @@
 #include "errors.hpp"
 using namespace std;
 
+template <typename T>
 class Array{
     protected:
-        int size = 0; int capacity = 10; int *data;
+        int size = 0; int capacity = 10; T *data;
     public:
-        Array(){data = new int[capacity];}
+        Array(){data = new T[capacity];}
         virtual ~Array(){delete[] data;}
 
         Array(const Array& arr){
             size = arr.size;
             capacity = arr.capacity;
-            data = new int[capacity];
+            data = T int[capacity];
             for (int i = 0;i<size;i++) data[i] = arr.data[i];
         }
 
@@ -25,7 +26,7 @@ class Array{
         const Array& operator= (const Array& arr){
             if (this==&arr) throw SameDataException();
 
-            int *newdata = new int[arr.capacity];
+            T *newdata = new T[arr.capacity];
             for (int i = 0;i<size;i++) newdata[i] = arr.data[i];
             delete[] data;
             
