@@ -5,15 +5,16 @@
 
 using namespace std;
 
-class Stack : protected Array{
+template <typename T>
+class Stack : protected Array<T>{
     public:
-        void push(int value){Array::push(value);}
-        int pop(){return Array::pop();}
-        void clear(){Array::clear();}
-        void change(int index) { Array::change(index); }
-        int search(int value){return Array::search(value);}
+        void push(int value){this->Array<T>::push(value);}
+        T pop(){return this->Array<T>::pop();}
+        void clear(){this->Array<T>::clear();}
+        void change(int index) { this->Array<T>::change(index); }
+        int search(int value){return this->Array<T>::search(value);}
 
-        int peek(){
+        T peek(){
             return size == 0 ? throw EmptyArrayException() : data[size-1];
         }
 
@@ -33,14 +34,15 @@ class Stack : protected Array{
             int n; in>>n;
             if(n<0) throw NegativeSizeException();
                 for (int i=0; i<n;i++){
-                    int value; in>>value;
+                    T value; in>>value;
                     st.push(value);
                 }
                 return in;
         }
 };
 
-class Limitedstack : public Stack{
+template <typename T>
+class Limitedstack : public Stack<T>{
     private: int limit;
     public:
         Limitedstack(int max){
@@ -48,7 +50,7 @@ class Limitedstack : public Stack{
             limit = max;
         }
 
-        virtual void push(int value){
+        virtual void push(T value){
             if (size>=limit) throw OverflowDataException();
             Stack::push(value);
         }
@@ -60,7 +62,7 @@ class Limitedstack : public Stack{
                 f = 1; n = ls.limit-ls.size;
             }
             for (int i=0; i<n;i++){
-                int value; in>>value;
+                T value; in>>value;
                 ls.push(value);
             }
             if (f==1) throw StackOverflowException();
@@ -68,12 +70,13 @@ class Limitedstack : public Stack{
         }
 };
 
-void commands(Stack &arr){
+template <typename T>
+void commands(Stack<T>& arr){
     int command; cin>>command;
     while(command){
         switch(command){
             case 1:{
-                try{int value; cin>>value; arr.push(value); }
+                try{T value; cin>>value; arr.push(value); }
                 catch(arrayerror &e){
                     cout << e.msg() << '\n';
                 }
@@ -95,7 +98,7 @@ void commands(Stack &arr){
                 break;
             }
             case 5: {
-                try{int value; cin>>value; cout<<arr.search(value)<< '\n';}
+                try{T value; cin>>value; cout<<arr.search(value)<< '\n';}
                 catch(arrayerror &e){
                     cout << e.msg() << '\n';
                 }
@@ -118,12 +121,12 @@ void cycle(){
     int v; cout << "Enter <1> for Stack, <2> for Limited Stack.\n"; cin>>v;
     switch (v){
     case 1:{
-        Stack st; commands(st);
+        Stack<int> st; commands(st);
         break;
     }
     case 2:{
         int max; cout<<"Enter the limit\n"; cin>>max;
-        try{Limitedstack ls(max); commands(ls);}
+        try{Limitedstack<int> ls(max); commands(ls);}
         catch(arrayerror &e){
             cout << e.msg() << '\n';
         }
@@ -133,7 +136,8 @@ void cycle(){
 }
 
 void tests(){
-    Stack st; string message = " ";
+    string message = " ";
+    Stack<int> st;
     st.push(2); st.push(6); st.push(7);
 
     assert(st.peek() == 7);
@@ -142,23 +146,21 @@ void tests(){
     assert(!st.isEmpty());
     st.clear(); assert(st.isEmpty());
 
-    try{st.peek();}
+    Limitedstack<double> ls(4);
+    ls.push(45.5); ls.push(8.8); ls.push(14.3); ls.push(25.7);
+
+    try{ls.push(0.0);}
     catch(arrayerror& e){message=e.msg();}
     assert(message != " "); message = " ";
 
-    Limitedstack ls(4);
-    ls.push(45); ls.push(8); ls.push(14); ls.push(25);
+    ls.pop(); ls.push(0.0);
+    assert(ls.peek()==0.0);
 
-    try{ls.push(0);}
-    catch(arrayerror& e){message=e.msg();}
-    assert(message != " "); message = " ";
+    Stack<char> letters;
+    letters.push('q'); letters.push('e'); letters.push('d');
 
-    ls.pop(); ls.push(0);
-    assert(ls.peek()==0);
-
-    try{Limitedstack ls2(0);}
-    catch(arrayerror& e){message=e.msg();}
-    assert(message != " "); message = " ";
+    assert(letters.pop() == 'd'); assert(letters.pop() == 'e');
+    assert(letters.peek() == 'q');
 
     cout<<"All tests were passed.\n";
 }
