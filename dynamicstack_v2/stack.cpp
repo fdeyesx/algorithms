@@ -15,11 +15,11 @@ class Stack : protected Array<T>{
         int search(T value){return this->Array<T>::search(value);}
 
         T peek(){
-            return size == 0 ? throw EmptyArrayException() : data[size-1];
+            return this->size == 0 ? throw EmptyArrayException() : this->data[this->size-1];
         }
 
         bool isEmpty(){
-            return size == 0;
+            return this->size == 0;
         }
 
         friend ostream& operator<< (ostream& out, Stack& st){
@@ -51,8 +51,8 @@ class Limitedstack : public Stack<T>{
         }
 
         virtual void push(T value){
-            if (size>=limit) throw OverflowDataException();
-            Stack::push(value);
+            if (this->size>=limit) throw OverflowDataException();
+            Stack<T>::push(value);
         }
 
         friend istream& operator>> (istream& in,  Limitedstack& ls){
