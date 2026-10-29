@@ -8,11 +8,11 @@ using namespace std;
 template <typename T>
 class Stack : protected Array<T>{
     public:
-        void push(int value){this->Array<T>::push(value);}
+        void push(T value){this->Array<T>::push(value);}
         T pop(){return this->Array<T>::pop();}
         void clear(){this->Array<T>::clear();}
         void change(int index) { this->Array<T>::change(index); }
-        int search(int value){return this->Array<T>::search(value);}
+        int search(T value){return this->Array<T>::search(value);}
 
         T peek(){
             return size == 0 ? throw EmptyArrayException() : data[size-1];
