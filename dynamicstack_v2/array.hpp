@@ -14,11 +14,11 @@ class Array{
         Array(const Array& arr){
             size = arr.size;
             capacity = arr.capacity;
-            data = T int[capacity];
+            data = new T[capacity];
             for (int i = 0;i<size;i++) data[i] = arr.data[i];
         }
 
-        int& operator[](int index){
+        T& operator[](int index){
             if (index<0 || index >= size) throw OverflowDataException();
             return data[index];
         }
@@ -37,7 +37,7 @@ class Array{
             return *this;
         }
 
-        int pop(){
+        T pop(){
             return size == 0 ? throw EmptyArrayException() : data[--size];
         }
 
@@ -49,7 +49,7 @@ class Array{
             return out;
         }
 
-        virtual void push(int value){
+        virtual void push(T value){
             if (size==capacity) resize();
             data[size++] = value;
         }
@@ -58,7 +58,7 @@ class Array{
             int n; in>>n;
             if(n<0) throw NegativeSizeException();
                 for (int i=0; i<n;i++){
-                    int value; in>>value;
+                    T value; in>>value;
                     arr.push(value);
                 }
                 return in;
@@ -82,7 +82,7 @@ class Array{
     private:
         void resize(){
             capacity*=2;
-            int *tmp = new int[capacity];
+            T *tmp = new T[capacity];
             for (int i =0; i<size;i++) tmp[i] = data[i];
             delete[] data; data = tmp;
         }
