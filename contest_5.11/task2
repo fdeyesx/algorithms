@@ -161,20 +161,23 @@ class List{
             if(!left){result = left; return;}; if(!right){result = right; return;};
             if(left->value <= right->value){
                 result = left;
-                left->next = merge(left->next, right,result->next);
-                left->next->prev = next;
-                left->prev = nullptr;             
+                merge(left->next, right,result->next);
+                result->next->prev = result;
+                result->prev = nullptr;             
             } else {
                 result = right;
-                right->next = merge(left, right->next,result->next);
-                right->next->prev = next;
-                right->prev = nullptr;
+                merge(left, right->next,result->next);
+                result->next->prev = result;
+                result->prev = nullptr;
             }
         }
 
         void merge_sort(Node*&node){
             if(node==nullptr || node->next == nullptr) return;
-            int middle_index = count/2;
+            int len = 0;
+            Node* tmp = node;
+            while(tmp){tmp=tmp->next; len++;}
+            int middle_index = len/2;
 
             Node*middle = node; int i=0;
             while (i<middle_index-1){
@@ -185,7 +188,7 @@ class List{
             middle->next=nullptr;
             right_list->prev=nullptr;
             
-            Node*left = merge_sort(node); Node*right = merge_sort(right_list); merge(left,right,node);
+            merge_sort(node); merge_sort(right_list); merge(node,right_list,node);
         }
 };
 
