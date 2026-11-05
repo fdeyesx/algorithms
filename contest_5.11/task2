@@ -157,32 +157,35 @@ class List{
             if(head!=nullptr) merge_sort(head);
         }
     private:
-        void merge(Node*left, Node*right){
-            if(!left) return left; if(!right) return right;
+        void merge(Node*left, Node*right, Node*&result){
+            if(!left){result = left; return;}; if(!right){result = right; return;};
             if(left->value <= right->value){
-                left->next = merge(left->next, right);               
-                return left;
-
+                result = left;
+                left->next = merge(left->next, right,result->next);
+                left->next->prev = next;
+                left->prev = nullptr;             
             } else {
-                right->next = merge(left, right->next);  
-                return right;
+                result = right;
+                right->next = merge(left, right->next,result->next);
+                right->next->prev = next;
+                right->prev = nullptr;
             }
         }
 
-        void merge_sort(Node*node){
+        void merge_sort(Node*&node){
             if(node==nullptr || node->next == nullptr) return;
             int middle_index = count/2;
 
             Node*middle = node; int i=0;
-            while (i<middle_index){
-                middle = middle-next; i++;
+            while (i<middle_index-1){
+                middle = middle->next; i++;
             }
 
-            Node*tmp = middle;
-            tmp->next = nullptr;
-            middle->prev = nullptr;
+            Node*right_list = middle->next;
+            middle->next=nullptr;
+            right_list->prev=nullptr;
             
-            Node*left = merge_sort(node); Node*right = merge_sort(middle); merge(left,right);
+            Node*left = merge_sort(node); Node*right = merge_sort(right_list); merge(left,right,node);
         }
 };
 
