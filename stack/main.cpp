@@ -11,7 +11,7 @@ void tests(){
     assert(ast.peek() == 7);
     assert(!ast.isEmpty());
 
-    LStack<double> lst; 
+    Limitedstack<double, AStack> lst(2); 
     lst.push(3.5); lst.push(0.3);
     assert(lst.peek() == 0.3);
     assert(lst.pop()==0.3);
@@ -36,6 +36,7 @@ void tests(){
     assert(ast2.peek()==7);
     assert(ast2.pop()==7);
     assert(ast2.peek()==23);
+
     cout<<"All tests were passed.\n";
 }
 
