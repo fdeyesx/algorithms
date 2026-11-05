@@ -15,10 +15,10 @@ class List{
             T value;
             Node* next; Node* prev;
         };
-        Node* head; Node* end;
+        Node* head; Node* end; int count;
 
     public:
-        List(){head = nullptr; end = nullptr;}
+        List(){head = nullptr; end = nullptr; count = 0;}
         virtual ~List(){clear();}
 
         List(const List& list){
@@ -51,6 +51,7 @@ class List{
             if (head != nullptr) head->prev = node;
             else end = node;
             head = node;
+            count++;
         }
 
         void push_back(T value) {
@@ -62,6 +63,7 @@ class List{
             if (end != nullptr) end->next = node;
             else head = node;
             end = node;
+            count++;
         }
 
         friend istream& operator>> (istream& in,  List& list){
@@ -81,7 +83,7 @@ class List{
             head = head->next;
             if(head!=nullptr) head->prev = nullptr;
             else end = nullptr;
-            delete tmp;
+            delete tmp; count--;
             return value;
         }
         
@@ -92,7 +94,7 @@ class List{
             end = end->prev;
             if(end!=nullptr) end->next = nullptr;
             else head = nullptr;
-            delete tmp;
+            delete tmp; count--;
             return value;
         }
 
@@ -114,4 +116,5 @@ class List{
             }
             end = nullptr;
         }
+        T getsize(){return count;}
 };
