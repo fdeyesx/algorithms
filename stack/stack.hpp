@@ -48,7 +48,7 @@ class Limitedstack : public Stack<T>{
                 T value; in>>value;
                 ls.push(value);
             }
-            if (f==1) throw StackOverflowException();
+            if (f==1) throw OverflowException();
             return in;
         }
 };
