@@ -80,6 +80,8 @@ class Array{
         void clear(){
             size = 0;
         }
+
+        T getsize(){return size;}
     private:
         void resize(){
             capacity*=2;
