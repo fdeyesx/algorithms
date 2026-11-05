@@ -155,10 +155,12 @@ class List{
 
         void sort(){
             if(head!=nullptr) merge_sort(head);
+            end=head;
+            while(end->next) end = end->next;
         }
     private:
         void merge(Node*left, Node*right, Node*&result){
-            if(!left){result = left; return;}; if(!right){result = right; return;};
+            if(!left){result = right; return;}; if(!right){result = left; return;};
             if(left->value <= right->value){
                 result = left;
                 merge(left->next, right,result->next);
@@ -186,7 +188,7 @@ class List{
 
             Node*right_list = middle->next;
             middle->next=nullptr;
-            right_list->prev=nullptr;
+            if (right_list) right_list->prev=nullptr;
             
             merge_sort(node); merge_sort(right_list); merge(node,right_list,node);
         }
