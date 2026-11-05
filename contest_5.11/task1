@@ -1,0 +1,108 @@
+#pragma once
+#include <iostream>
+#include "errors.hpp"
+using namespace std;
+
+class Array{
+    protected:
+        int size = 0; int capacity = 10; T *data;
+    public:
+        Array(){data = new T[capacity];}
+        virtual ~Array(){delete[] data;}
+
+        Array(const Array& arr){
+            size = arr.size;
+            capacity = arr.capacity;
+            data = new T[capacity];
+            for (int i = 0;i<size;i++) data[i] = arr.data[i];
+        }
+
+        int& operator[](int index){
+            if (index<0 || index >= size) throw OverflowDataException();
+            return data[index];
+        }
+
+        const Array& operator= (const Array& arr){
+            if (this==&arr) throw SameDataException();
+
+            T *newdata = new T[arr.capacity];
+            for (int i = 0;i<arr.size;i++) newdata[i] = arr.data[i];
+            delete[] data;
+            
+            data = newdata;
+            size = arr.size;
+            capacity = arr.capacity;
+            
+            return *this;
+        }
+
+        int pop_back(){
+            return size == 0 ? throw EmptyDataException() : data[--size];
+        }
+
+        int pop_front(){
+            if (size==0) throw EmptyDataException();
+            T val = data[0];
+            for (int i = 0; i<size; i++) data[i] = data[i+1];
+            size--;
+        }
+
+        friend ostream& operator<< (ostream& out, Array& arr){
+            for (int i = 0; i<arr.size; ++i){
+                out<<arr.data[i];
+                if (i+1<arr.size) out<<" ";
+            }
+            return out;
+        }
+
+        virtual void push_back(T value){
+            if (size==capacity) resize();
+            data[size++] = value;
+        }
+
+        virtual void push_front(T value){
+            if (size==capacity) resize();
+            for (int i = size; i > 0; --i) data[i] = data[i-1];
+            data[0] = value; size++;
+        }
+
+        friend istream& operator>> (istream& in, Array& arr){
+            int n; in>>n;
+            if(n<0) throw NegativeSizeException();
+                for (int i=0; i<n;i++){
+                    T value; in>>value;
+                    arr.push_back(value);
+                }
+                return in;
+        }
+
+        void clear(){
+            size = 0;
+        }
+
+        int getsize(){return size;}
+    private:
+        void resize(){
+            capacity*=2;
+            int *tmp = new int[capacity];
+            for (int i =0; i<size;i++) tmp[i] = data[i];
+            delete[] data; data = tmp;
+        }
+};
+
+void merge(int*arr, int left, int right){
+    if (arr.getsize()<=1)return arr;
+
+}
+
+void merge_sort(int*arr, int left, int right){
+    if (left => right) return;
+    int middle = (int)(arr.getsize()/2);
+    left_array = ;
+    right_array = ;
+
+    sorted_left = merge_sort(left_array);
+    sorted_right = merge_sort(right_array);
+
+    
+}
