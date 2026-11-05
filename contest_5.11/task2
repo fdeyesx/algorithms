@@ -136,10 +136,10 @@ class List{
         friend ostream& operator<< (ostream& out, List& list){
             Node* cur = list.head;
             while (cur != nullptr) {
-                out << cur->value << " -> ";
+                out << cur->value << " ";
                 cur = cur->next;
             }
-            out << "NULL\n";
+            out << "\n";
             return out;
         }
 
@@ -154,47 +154,41 @@ class List{
         int getsize(){return count;}
 
         void sort(){
-            if(size>1) merge_sort(0,size-1);
+            if(head!=nullptr) merge_sort(head);
         }
     private:
-        void merge(int left, int right, int mid){
-            int n1 = mid-left+1; int n2 = right-mid;
-            int* t1 = new int[n1]; int* t2 = new int[n2];
+        void merge(Node*left, Node*right){
+            if(!left) return left; if(!right) return right;
+            if(left->value <= right->value){
+                left->next = merge(left->next, right);               
+                return left;
 
-            for (int i = 0; i<n1;i++) t1[i] = data[left+i];
-            for (int i = 0; i<n2;i++) t2[i] = data[mid+1+i];
-            int i = 0, j = 0, k = left;
-            while(i<n1 && j <n2){
-                if (t1[i] <= t2[j]){
-                    data[k] = t1[i];
-                    i++;
-                } else if (t1[i]>t2[j]){
-                    data[k] = t2[j];
-                    j++;
-                }
-                k++;
+            } else {
+                right->next = merge(left, right->next);  
+                return right;
             }
-            while(i<n1){
-                data[k] = t1[i];
-                i++, k++;
-            }
-            while(j<n2){
-                data[k]=t2[j]; j++;k++;
-            }
-            delete[]t1; delete[]t2;
         }
 
-        void merge_sort(int left, int right){
-            if (left >= right) return;
-            int middle = left+(right-left)/2;
+        void merge_sort(Node*node){
+            if(node==nullptr || node->next == nullptr) return;
+            int middle_index = count/2;
 
-            merge_sort(left,middle); merge_sort(middle+1,right); merge(left,right,middle);
+            Node*middle = node; int i=0;
+            while (i<middle_index){
+                middle = middle-next; i++;
+            }
+
+            Node*tmp = middle;
+            tmp->next = nullptr;
+            middle->prev = nullptr;
+            
+            Node*left = merge_sort(node); Node*right = merge_sort(middle); merge(left,right);
         }
 };
 
 int main(){
     List list; cin >> list;
     list.sort();
-    cout << list << endl; 
+    cout << list; 
     return 0;
 }
