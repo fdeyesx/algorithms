@@ -45,31 +45,33 @@ class OverflowException : public errors {
         OverflowException() : errors("Limit's been reached.") {}
 };
 
+class List; 
+struct Node {
+    int value; Node* next; Node* prev; };
+
 class Listiterator{
-    private: Node*current;
-    public: 
+    public:
+        Node*current;
         Listiterator(){current = nullptr;}
         ~Listiterator(){}
-        int& operator*(){return current->value;}
-        int operator==(const Listiterator& l2){return current == l2;}
-        int operator!=(const Listiterator& l2){return current != l2;}
-        int operator=(const Listiterator& l2){return l2;}
+        int& operator*() const {return current->value;}
+        bool operator==(const Listiterator& l2){return current == l2.current;}
+        bool operator!=(const Listiterator& l2){return current != l2.current;}
+        Listiterator& operator=(const Listiterator& l2){current = l2.current; return *this;}
         Listiterator& operator++(){current=current->next; return *this;}
-        Listiterator begin(){return current;}
-        Listiterator end(){return nullptr;}
-}
+        Listiterator begin(){Listiterator it; it.current = current; return it;}
+        Listiterator end(){return Listiterator();}
+        friend class List;
+};
 
 class List{
     protected:
-        struct Node {
-            int value;
-            Node* next; Node* prev;
-        };
         Node* head; Node* end; int count;
-
     public:
         List(){head = nullptr; end = nullptr; count = 0;}
         virtual ~List(){clear();}
+
+        friend class Listiterator;
 
         List(const List& list){
             if (list.head == nullptr) throw EmptyDataException();
@@ -169,41 +171,45 @@ class List{
         int getsize(){return count;}
 
         void sort(){
-            if(head!=nullptr) merge_sort(head);
-            Listiterator end = head;
-            while(end && end++) end++;
+            if(head!=nullptr){
+                merge_sort(head);
+                Listiterator it; it.current = head;
+                while(it.current!=nullptr) ++it;
+                end = it.current;
+            }
         }
     private:
         void merge(Node*left, Node*right, Node*&result){
             if(!left){result = right; return;}; if(!right){result = left; return;};
-            Listiterator left = begin(); Listiterator right = begin();
-            Listiterator result = begin();
-            if(left->value <= right->value){
-                result = left;
-                merge(left++, right,result++);
-                result->next->prev = result;
-                result->prev = nullptr;             
+
+            Listiterator l_it; l_it.current = left;
+            Listiterator r_it; r_it.current = right;
+            Listiterator result_it; result_it.current = result;
+
+            if(*l_it <= *r_it){
+                result = left; ++l_it; ++result_it;
+                merge(l_it.current, right, result_it.current);       
             } else {
-                result = right;
-                merge(left, right++,result++);
-                result->next->prev = result;
-                result->prev = nullptr;
+                result = right; ++r_it; ++result_it;
+                merge(left, r_it.current, result_it.current); 
             }
+
+            result->next->prev = result;
+            result->prev = nullptr;
         }
 
         void merge_sort(Node*&node){
             if(node==nullptr || node->next == nullptr) return;
-            int len = 0;
-            for (Listiterator it = begin(); it!=end(); it++)len++;
+            int len = 0; Listiterator it;
+            for (it.current = node; it.current != nullptr; ++it)len++;
 
             int middle_index = len/2;
-            Listiterator middle = begin(); int i=0;
+            Listiterator middle; middle.current = node; int i=0;
             while (i<middle_index-1){
-                middle++; i++;
+                ++middle; i++;
             }
 
-            Node*right_list = nullptr; right_list++; right_list = middle++;
-            middle++; middle = nullptr;
+            Node* left_list = node; Node* right_list = middle.current;
             
             merge_sort(node); merge_sort(right_list); merge(node,right_list,node);
         }
