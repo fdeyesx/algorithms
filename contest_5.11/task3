@@ -174,7 +174,7 @@ class List{
             if(head!=nullptr){
                 merge_sort(head);
                 Listiterator it; it.current = head;
-                while(it.current!=nullptr) ++it;
+                while(it.current != nullptr && it.current->next != nullptr) ++it;
                 end = it.current;
             }
         }
@@ -184,18 +184,30 @@ class List{
 
             Listiterator l_it; l_it.current = left;
             Listiterator r_it; r_it.current = right;
-            Listiterator result_it; result_it.current = result;
 
             if(*l_it <= *r_it){
-                result = left; ++l_it; ++result_it;
-                merge(l_it.current, right, result_it.current);       
+                result = left; ++l_it; 
+                Listiterator result_it; result_it.current = result; 
+                Node* temp_next = nullptr;
+                merge(l_it.current, right, temp_next);
+                if (temp_next) {
+                    Listiterator tn_it; tn_it.current = temp_next;
+                    tn_it.current->prev = result_it.current; 
+                }
+                result_it.current->prev = nullptr;
+                result_it.current->next = temp_next;
             } else {
-                result = right; ++r_it; ++result_it;
-                merge(left, r_it.current, result_it.current); 
+                result = right; ++r_it; 
+                Listiterator result_it; result_it.current = result; 
+                Node* temp_next = nullptr;
+                merge(left, r_it.current, temp_next);
+                if (temp_next) {
+                    Listiterator tn_it; tn_it.current = temp_next;
+                    tn_it.current->prev = result_it.current; 
+                }
+                result_it.current->prev = nullptr;
+                result_it.current->next = temp_next;
             }
-
-            result->next->prev = result;
-            result->prev = nullptr;
         }
 
         void merge_sort(Node*&node){
@@ -208,10 +220,20 @@ class List{
             while (i<middle_index-1){
                 ++middle; i++;
             }
+            Node* left_list = node;
+            Node* right_list = nullptr;
 
-            Node* left_list = node; Node* right_list = middle.current;
-            
-            merge_sort(node); merge_sort(right_list); merge(node,right_list,node);
+            Listiterator temp = middle; ++temp;
+            Node* temp_next = temp.current;
+
+            middle.current->next = nullptr; 
+
+            Listiterator tn_it; tn_it.current = temp_next;
+            tn_it.current->prev = nullptr;
+            right_list = tn_it.current;
+
+            merge_sort(left_list); merge_sort(right_list); 
+            node = nullptr; merge(left_list,right_list,node);
         }
 };
 
