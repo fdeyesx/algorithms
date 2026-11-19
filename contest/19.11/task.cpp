@@ -1,0 +1,222 @@
+#include <iostream>
+#include <functional>
+using namespace std;
+
+class errors{
+    protected: std::string message; 
+    public:
+        errors(const std::string& text) {message = text;}
+        virtual ~errors() {}
+        std::string msg(){return message;}
+};
+
+class EmptyDataException : public errors{
+    public:
+        EmptyDataException(): errors("Data is empty."){}
+};
+
+class WrongTypeException : public errors{
+    public:
+        WrongTypeException(): errors("Wrong type's been entered."){}
+};
+
+class SameDataException : public errors{
+    public:
+        SameDataException(): errors("Assignment same data."){}
+};
+
+class OverflowDataException : public errors{
+    public:
+        OverflowDataException(): errors("Index's out of range."){}
+};
+
+class NegativeSizeException : public errors{
+    public:
+        NegativeSizeException(): errors("Negative number for size has been entered."){}
+};
+
+class NotFound : public errors{
+    public:
+        NotFound(): errors("Value hasn't been found."){}
+};
+
+class OverflowException : public errors {
+    public:
+        OverflowException() : errors("Limit's been reached.") {}
+};
+
+template <typename T>
+class Array{
+    protected:
+        int size = 0; int capacity = 10; T *data;
+    public:
+        Array(){data = new T[capacity];}
+        virtual ~Array(){delete[] data;}
+
+        Array(const Array& arr){
+            size = arr.size;
+            capacity = arr.capacity;
+            data = new T[capacity];
+            for (int i = 0;i<size;i++) data[i] = arr.data[i];
+        }
+
+        T& operator[](int index){
+            if (index<0 || index >= size) throw OverflowDataException();
+            return data[index];
+        }
+
+        const Array& operator= (const Array& arr){
+            if (this==&arr) throw SameDataException();
+
+            T *newdata = new T[arr.capacity];
+            for (int i = 0;i<arr.size;i++) newdata[i] = arr.data[i];
+            delete[] data;
+            
+            data = newdata;
+            size = arr.size;
+            capacity = arr.capacity;
+            
+            return *this;
+        }
+
+        T pop_back(){
+            return size == 0 ? throw EmptyDataException() : data[--size];
+        }
+
+        T pop_front(){
+            if (size==0) throw EmptyDataException();
+            T val = data[0];
+            for (int i = 0; i<size; i++) data[i] = data[i+1];
+            size--;
+        }
+
+        friend ostream& operator<< (ostream& out, Array& arr){
+            for (int i = 0; i<arr.size; ++i){
+                out<<arr.data[i];
+                if (i+1<arr.size) out<<" ";
+            }
+            return out;
+        }
+
+        virtual void push_back(T value){
+            if (size==capacity) resize();
+            data[size++] = value;
+        }
+
+        virtual void push_front(T value){
+            if (size==capacity) resize();
+            for (int i = size; i > 0; --i) data[i] = data[i-1];
+            data[0] = value; size++;
+        }
+
+        friend istream& operator>> (istream& in, Array& arr){
+            int n; in>>n;
+            if(n<0) throw NegativeSizeException();
+                for (int i=0; i<n;i++){
+                    T value; in>>value;
+                    arr.push_back(value);
+                }
+                return in;
+        }
+
+        void clear(){
+            size = 0;
+        }
+
+        int getsize(){return size;}
+    private:
+        void resize(){
+            capacity*=2;
+            T *tmp = new T[capacity];
+            for (int i =0; i<size;i++) tmp[i] = data[i];
+            delete[] data; data = tmp;
+        }
+};
+
+//1st part
+class Event{
+    virtual ~Event(){};
+}
+
+class ClickEvent: public Event{
+protected: int x,y;
+public:
+    ClickEvent(int dot_x, int dot_y){
+        x = dot_x; y = dot_y;
+    }
+}
+
+class CharEvent: public Event{
+protected: char key;
+public:
+    CharEvent(char k){
+        key = k;
+    }
+}
+
+
+//2 part
+template <typename T>
+class EventDispatcher{
+    Array<function<void(const T&)>> listeners;
+    EventDispatcher(){
+        static_assert(std::is_base_of<Event, T>::value, "T must inherit from Event")
+    }    
+
+    void subscribe(std::function<void(const T&)> callback){
+        listeners.push_back(callback);
+    }
+    void dispatch(const T& event){
+        for(int i = 0, i < listeners.getsize(); i++) listeners[i](event);
+    }
+}
+
+//3 part
+class Button: public EventDispatcher<ClickEvent>{
+    void click(int x, int y){
+        ClickEvent event(x,y);
+        dispatch(event);
+    }
+}
+
+class Keyboard: public EventDispatcher<KeyEvent>{
+    void pressKey(char c){
+        KeyEvent event(c);
+        dispatch(event);
+    }
+}
+
+int main(){
+    int events_number; cin>>events_number;
+    Button button; 
+    Keyboard keyboard;
+    int clicks = 0;
+    int keys = 0;
+
+    Button clicks_stats[](int x, int y){
+        cout << "Click " x << y << endl;
+        button.click(x,y);
+        clicks++;
+    };
+
+    Keyboard keyboard_stats[](char c){
+        cout << "Key " c << endl;
+        keyboard.pressKey(c);
+        keys++;
+    };
+
+    for (int i = 0; i<events_number;i++){
+        string type; cin>>type;
+        if(type=="CLICK"){
+            int x,y; cin>>x,y;
+            clicks_stats(x,y);
+        }
+        else if(type=="KEY"){
+            char key; cin>>key;
+            keyboard_stats(c);
+        }
+    }
+
+    cout << "Stats: clicks=" << clicks << ", keys=" << keys;
+    return 0;
+}
