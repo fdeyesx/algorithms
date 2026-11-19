@@ -135,8 +135,9 @@ class Array{
 
 //1st part
 class Event{
+public:
     virtual ~Event(){};
-}
+};
 
 class ClickEvent: public Event{
 protected: int x,y;
@@ -144,79 +145,80 @@ public:
     ClickEvent(int dot_x, int dot_y){
         x = dot_x; y = dot_y;
     }
-}
+};
 
-class CharEvent: public Event{
+class KeyEvent: public Event{
 protected: char key;
 public:
-    CharEvent(char k){
+    KeyEvent(char k){
         key = k;
     }
-}
+};
 
 
 //2 part
 template <typename T>
 class EventDispatcher{
     Array<function<void(const T&)>> listeners;
+public:    
     EventDispatcher(){
-        static_assert(std::is_base_of<Event, T>::value, "T must inherit from Event")
+        static_assert(std::is_base_of<Event, T>::value, "T must inherit from Event");
     }    
 
     void subscribe(std::function<void(const T&)> callback){
         listeners.push_back(callback);
     }
     void dispatch(const T& event){
-        for(int i = 0, i < listeners.getsize(); i++) listeners[i](event);
+        for(int i = 0; i < listeners.getsize(); i++) listeners[i](event);
     }
-}
+};
 
 //3 part
 class Button: public EventDispatcher<ClickEvent>{
-    void click(int x, int y){
+public: void click(int x, int y){
         ClickEvent event(x,y);
         dispatch(event);
     }
-}
+};
 
 class Keyboard: public EventDispatcher<KeyEvent>{
-    void pressKey(char c){
+public: void pressKey(char c){
         KeyEvent event(c);
         dispatch(event);
     }
-}
+};
 
 int main(){
     int events_number; cin>>events_number;
     Button button; 
     Keyboard keyboard;
-    int clicks = 0;
-    int keys = 0;
+    int clicks_count = 0;
+    int keys_count = 0;
 
-    Button clicks_stats[](int x, int y){
-        cout << "Click " x << y << endl;
+    auto clicks_stats = [&button, &clicks_count](int x, int y){
+        cout << "Click " << x << " " << y << endl;
         button.click(x,y);
-        clicks++;
+        clicks_count++;
     };
 
-    Keyboard keyboard_stats[](char c){
-        cout << "Key " c << endl;
+    auto keyboard_stats = [&keyboard, &keys_count](char c){
+        cout << "Key " << c << endl;
         keyboard.pressKey(c);
-        keys++;
+        keys_count++;
     };
 
     for (int i = 0; i<events_number;i++){
         string type; cin>>type;
         if(type=="CLICK"){
-            int x,y; cin>>x,y;
+            int x,y; cin>>x; cin>>y;
             clicks_stats(x,y);
         }
         else if(type=="KEY"){
             char key; cin>>key;
-            keyboard_stats(c);
+            keyboard_stats(key);
         }
     }
 
-    cout << "Stats: clicks=" << clicks << ", keys=" << keys;
+    cout << "Stats: clicks=" << clicks_count << ", keys=" << keys_count << endl;
     return 0;
 }
